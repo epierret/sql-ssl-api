@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: secured-svc
+  name: secured-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secured-svc
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: secured-svc
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: index-vol
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+      volumes:
+       - name: index-vol
+         configMap:
+          name: tls-cm

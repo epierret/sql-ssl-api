@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: import-mangas
+spec:
+  template:
+    spec:
+      containers:
+      - name: import
+        image: mariadb:10.11
+        command: 
+        - /bin/sh
+        - -c
+        - |
+          mysql -h mariadb-0.mariadb -uroot -prootpass mangasdb \
+            -e "$(while IFS=, read -r manga auteur; do echo \"INSERT INTO mangas (title,author) VALUES ('$manga','$auteur');\"; done < /data/mangas.txt)"
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+      restartPolicy: OnFailure
+      volumes:
+      - name: data-volume
+        configMap:
+          name: mangas-config

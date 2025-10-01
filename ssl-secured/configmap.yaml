@@ -1,0 +1,14 @@
+apiVersion: v1                                                                                                                                                                                                                                                                                                                                                        
+kind: ConfigMap
+metadata:
+  name: tls-cm
+data:
+  index.html: |
+    <!doctype html>
+    <html>
+    <head><title>
+    <
+      <mon site sécurisé 🚀</title></head>body>h1>Deploiement du site securisé via https ! 🔐</h1>
+      <p>servi par kubernetes + nginx ingress</p>
+    </body>
+    </html>

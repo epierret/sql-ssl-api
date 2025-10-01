@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mangas-config
+data:
+  mangas.txt: |
+    Berserk,Kentaro Miura
+    Hxh,Yoshihiro Togashi
+    Kingdom,Yasuhisa Hara
+    OnePiece,Eichiro Oda
+    Snk,Hajime Isayama
