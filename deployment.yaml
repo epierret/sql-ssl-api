@@ -1,28 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql
+  clusterIP: None
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: secured-svc
-  name: secured-svc
+  name: mysql
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: secured-svc
-  strategy: {}
+      app: mysql
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
-        app: secured-svc
+        app: mysql
     spec:
       containers:
-      - image: nginx
-        name: nginx
+      - image: mysql:8.0
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-database
+        ports:
+        - containerPort: 3306
+          name: mysql
         volumeMounts:
-        - name: index-vol
-          mountPath: /usr/share/nginx/html/index.html
-          subPath: index.html
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
       volumes:
-       - name: index-vol
-         configMap:
-          name: tls-cm
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim

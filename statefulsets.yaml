@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-client
+spec:
+  serviceName: "mysql-client"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-client
+  template:
+    metadata:
+      labels:
+        app: mysql-client
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: mysql-client
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        - name: MYSQL_HOST
+          value: "mysql"
+        - name: MYSQL_DATABASE
+          value: "sys"
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # Attendre que MySQL soit prêt
+          until mysql -h $MYSQL_HOST -u root -p$MYSQL_ROOT_PASSWORD -e "SELECT 1" 2>/dev/null; do
+            echo "En attente de MySQL..."
+            sleep 5
+          done
+
+          echo "Connexion à MySQL réussie"
+          
+          # Exécuter les requêtes SQL
+          echo "=== Affichage des bases de données ==="
+          mysql -h $MYSQL_HOST -u root -p$MYSQL_ROOT_PASSWORD -e "SHOW DATABASES;"
+          
+          echo ""
+          echo "=== Contenu de la table test dans sys ==="
+          mysql -h $MYSQL_HOST -u root -p$MYSQL_ROOT_PASSWORD -e "USE sys; SELECT * FROM test;"
+          
+          echo ""
+          echo "=== Client MySQL opérationnel ==="
+          
+          # Maintenir le container actif
+          while true; do
+            echo "[$(date)] Container actif - Ctrl+C pour arrêter"
+            sleep 60
+          done
