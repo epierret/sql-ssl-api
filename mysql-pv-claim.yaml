@@ -8,9 +8,5 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  # Pas de storageClassName -> utilise le classeur par défaut
-~                                                                                                                   
-~                                                                                                                   
-~                                                                                                                   
-~                                                                                                                   
-~                                                              
+  # Pas de storageClassName -> utilise le classeur par défaut#
+
