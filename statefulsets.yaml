@@ -38,20 +38,29 @@ spec:
           done
 
           echo "Connexion à MySQL réussie"
-          
-          # Exécuter les requêtes SQL
+
+          # Afficher les bases de données
           echo "=== Affichage des bases de données ==="
           mysql -h $MYSQL_HOST -u root -p$MYSQL_ROOT_PASSWORD -e "SHOW DATABASES;"
-          
+
           echo ""
-          echo "=== Contenu de la table test dans sys ==="
-          mysql -h $MYSQL_HOST -u root -p$MYSQL_ROOT_PASSWORD -e "USE sys; SELECT * FROM test;"
-          
+          echo "=== Création et affichage de la table confidential dans sys ==="
+          mysql -h $MYSQL_HOST -u root -p$MYSQL_ROOT_PASSWORD <<EOF
+USE sys;
+CREATE TABLE IF NOT EXISTS confidential (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(20)
+);
+INSERT INTO confidential (name) VALUES ('ligne_test') ON DUPLICATE KEY UPDATE name=name;
+SELECT * FROM confidential;
+EOF
+
           echo ""
           echo "=== Client MySQL opérationnel ==="
-          
+
           # Maintenir le container actif
           while true; do
             echo "[$(date)] Container actif - Ctrl+C pour arrêter"
             sleep 60
           done
+

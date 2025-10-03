@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-restrict-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      role: db         # sélectionne les pods DB
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress : qui peut joindre les pods DB
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          role: frontend   # frontend (même namespace)
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring  # namespace monitoring
+    - ipBlock:
+        cidr: 172.17.0.0/16
+        except:
+        - 172.17.1.0/24
+    ports:
+    - protocol: TCP
+      port: 3306         # MySQL
+
+  # Egress : ce que DB peut contacter
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/24     # example : monitoring backend / backup
+    ports:
+    - protocol: TCP
+      port: 5978              # exporter / monitoring port (si DB pousse métriques)
+
