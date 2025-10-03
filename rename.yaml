@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Définir un tableau avec l'ordre souhaité
+files=(
+  "secret.yaml"
+  "mysql-pv-claim.yaml"
+  "sql-volumes.yaml"
+  "statefulsets.yaml"
+  "network-policies.yaml"
+  "deployment.yaml"
+  "pod-attacker.yaml"
+)
+
+# Boucle pour renommer avec un numéro devant
+i=1
+for f in "${files[@]}"; do
+  # Ajouter un 0 devant si < 10 pour l'ordre correct
+  newname=$(printf "%02d-%s" "$i" "$f")
+  mv "$f" "$newname"
+  echo "Renommé $f → $newname"
+  ((i++))
+done
+
