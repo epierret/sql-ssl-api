@@ -1,0 +1,40 @@
+mysql -h mysql.default.svc.cluster.local -u root -prootpassword123
+
+create table confidential (id int auto_increment primary key, name varchar(20));
+
+
+kubectl run frontend --image=nicolaka/netshoot --restart=Never --labels="role=frontend" -- /bin/sh -c "sleep 3600"
+
+
+test 
+
+ Test TCP depuis le frontend (succès attendu)
+
+Depuis ton pod frontend :
+
+kubectl exec -it frontend -- bash
+# dans le shell du pod:
+nc -vz mysql 3306
+# ou
+curl -sS --connect-timeout 5 mysql:3306 >/dev/null && echo "port ouvert" || echo "connexion échouée"
+
+
+Attendu : succeeded / open / message de succès (nc affiche succeeded!).
+
+Pour tester la couche MySQL (si tu as le client ou utilises l'image mysql):
+
+kubectl run mysql-cli --rm -i --image=mysql:8.0 --restart=Never --env="MYSQL_PWD=$(kubectl get secret mysql-secret -o jsonpath='{.data.mysql-root-password}' | base64 --decode)" -- bash -c "mysql -h mysql -u root -e 'SHOW DATABASES;'"
+
+
+Attendu : liste de bases (SHOW DATABASES) — connexion OK.
+
+
+ Test TCP depuis l’attacker (échec attendu)
+
+Depuis pod attacker :
+
+kubectl exec -it attacker -- bash
+# dans le shell:
+nc -vz mysql 3306
+# ou
+curl -sS --connect-timeout 5 mysql:3306 >/dev/null && echo "port ouvert (unexpected)" || echo "connexion bloquée (expected)"
